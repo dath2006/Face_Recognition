@@ -205,3 +205,68 @@ export const downloadAttendanceReport = async (req, res) => {
     res.status(500).json({ message: "Failed to generate attendance report" });
   }
 };
+
+export const getStudentById = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.json(student);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching student" });
+  }
+};
+
+export const updateStudent = async (req, res) => {
+  try {
+    const {
+      name,
+      class: className,
+      section,
+      registerNo,
+      username,
+      photo,
+    } = req.body;
+
+    const student = await Student.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        class: className,
+        section,
+        registerNo,
+        username,
+        photo: req.file ? req.file.filename : photo,
+      },
+      { new: true }
+    );
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json(student);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating student" });
+  }
+};
+
+export const deleteStudent = async (req, res) => {
+  try {
+    const student = await Student.findByIdAndDelete(req.params.id);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Remove student reference from teacher
+    await Teacher.updateMany(
+      { students: req.params.id },
+      { $pull: { students: req.params.id } }
+    );
+
+    res.json({ message: "Student deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting student" });
+  }
+};

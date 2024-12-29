@@ -6,6 +6,7 @@ import ViewStudents from "../pages/teacher/ViewStudents";
 import MarkAttendance from "../pages/teacher/MarkAttendance";
 import TeacherChat from "../pages/teacher/TeacherChat";
 import AuthGuard from "../components/auth/AuthGuard";
+import EditStudent from "../pages/teacher/EditStudent";
 
 export const teacherRoutes = (
   <>
@@ -50,5 +51,6 @@ export const teacherRoutes = (
         </AuthGuard>
       }
     />
+    <Route path="/teacher/edit-student/:id" element={<EditStudent />} />
   </>
 );

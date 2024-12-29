@@ -1,6 +1,12 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { studentRoutes } from './studentRoutes';
-import { teacherRoutes } from './teacherRoutes';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { studentRoutes } from "./studentRoutes";
+import { teacherRoutes } from "./teacherRoutes";
+import LandingPage from "../pages/LandingPage";
 
 export default function AppRouter() {
   return (
@@ -8,8 +14,8 @@ export default function AppRouter() {
       <div className="min-h-screen bg-gray-50">
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Navigate to="/student/login" replace />} />
-          
+          <Route path="/" element={<LandingPage />} />
+
           {/* Student Routes */}
           {studentRoutes}
 

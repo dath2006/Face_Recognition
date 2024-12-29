@@ -8,6 +8,12 @@ import {
   downloadAttendanceReport,
 } from "../controllers/teacher.controller.js";
 import Teacher from "../models/Teacher.js";
+import { getStudentStatistics } from "../controllers/statisticsController.js";
+import {
+  getStudentById,
+  updateStudent,
+  deleteStudent,
+} from "../controllers/teacher.controller.js";
 
 const storage = multer.diskStorage({
   destination: "uploads/",
@@ -35,5 +41,15 @@ router.get("/students", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Error fetching students" });
   }
 });
+
+router.get("/get-statistics/:studentId", verifyToken, getStudentStatistics);
+router.get("/edit-student/:id", verifyToken, getStudentById);
+router.put(
+  "/edit-student/:id",
+  verifyToken,
+  upload.single("photo"),
+  updateStudent
+);
+router.delete("/edit-student/:id", verifyToken, deleteStudent);
 
 export default router;

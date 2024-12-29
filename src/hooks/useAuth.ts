@@ -1,50 +1,54 @@
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../stores/authStore';
-import { LoginFormData } from '../types/auth';
-import { authService } from '../services/authService';
-import { storage } from '../utils/storage';
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../stores/authStore";
+import { LoginFormData } from "../types/auth";
+import { authService } from "../services/authService";
+import { storage } from "../utils/storage";
 
 export const useAuth = () => {
   const navigate = useNavigate();
-  const { 
-    isAuthenticated,
-    userRole,
-    user,
-    token,
-    setAuth,
-    clearAuth 
-  } = useAuthStore();
+  const { isAuthenticated, userRole, user, token, setAuth, clearAuth } =
+    useAuthStore();
 
-  const login = useCallback(async (credentials: LoginFormData, role: 'student' | 'teacher') => {
-    try {
-      const response = await authService.login(role, credentials);
-      
-      // Store token in localStorage
-      storage.setToken(response.token);
-      
-      setAuth({
-        isAuthenticated: true,
-        userRole: role,
-        user: response.user,
-        token: response.token
-      });
-      
-      navigate(`/${role}/dashboard`);
-    } catch (error) {
-      throw new Error('Invalid credentials');
-    }
-  }, [navigate, setAuth]);
+  const login = useCallback(
+    async (credentials: LoginFormData, role: "student" | "teacher") => {
+      try {
+        // Clear any existing auth state before attempting login
+        clearAuth();
+        storage.removeToken();
+
+        const response = await authService.login(role, credentials);
+
+        setAuth({
+          isAuthenticated: true,
+          userRole: role,
+          user: response.user,
+          token: response.token,
+        });
+
+        // Store token in localStorage
+        storage.setToken(response.token);
+
+        // navigate(`/${role}/dashboard`);
+        return response;
+      } catch (error) {
+        clearAuth();
+        storage.removeToken();
+        throw error;
+      }
+    },
+    [navigate, setAuth]
+  );
 
   const logout = useCallback(() => {
     storage.removeToken();
     clearAuth();
-    navigate('/');
+    navigate("/");
   }, [navigate, clearAuth]);
 
   const checkAuth = useCallback(async () => {
     const token = storage.getToken();
-    
+
     if (!token) {
       clearAuth();
       return false;
@@ -68,6 +72,6 @@ export const useAuth = () => {
     token,
     login,
     logout,
-    checkAuth
+    checkAuth,
   };
 };

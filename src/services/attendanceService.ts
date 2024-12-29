@@ -43,7 +43,6 @@ export const attendanceService = {
 
   async getClassAttendance(classId: string, sectionId: string) {
     const { data } = await api.get(`/attendance/class/${classId}/${sectionId}`);
-    console.log(data);
     return data;
   },
 
