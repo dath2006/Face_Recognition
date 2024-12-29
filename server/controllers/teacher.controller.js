@@ -175,7 +175,7 @@ export const downloadAttendanceReport = async (req, res) => {
       {
         $match: {
           "attendance.date": {
-            $gte: new Date(date || new Date().toISOString().split("T")[0]),
+            $gte: new Date().toISOString().split("T")[0],
           },
         },
       },

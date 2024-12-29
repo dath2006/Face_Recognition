@@ -39,7 +39,7 @@ export const attendanceController = {
 
     // Add attendance record
     student.attendance.push({
-      date: new Date(),
+      date: new Date().toISOString().split("T")[0],
       subject,
       present,
     });
