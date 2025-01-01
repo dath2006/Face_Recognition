@@ -23,9 +23,8 @@ import mongoose from "mongoose";
 const attendanceRecordSchema = new mongoose.Schema(
   {
     date: {
-      type: Date,
+      type: String,
       required: true,
-      default: Date.now,
     },
     subject: {
       type: String,
@@ -36,7 +35,9 @@ const attendanceRecordSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { _id: false }
+  {
+    _id: false,
+  }
 );
 
 const studentSchema = new mongoose.Schema({

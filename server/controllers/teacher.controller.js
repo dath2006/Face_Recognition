@@ -3,6 +3,11 @@ import bcrypt from "bcryptjs";
 import Teacher from "../models/Teacher.js";
 import Student from "../models/Student.js";
 import { generateAttendanceReport } from "../services/excelService.js";
+import { io } from "../index.js";
+import {
+  runPythonScripts,
+  stopPythonScript,
+} from "../controllers/pythonScripts.js";
 
 export const login = async (req, res) => {
   try {
@@ -124,33 +129,50 @@ export const addStudent = async (req, res) => {
   }
 };
 
+let isCapturing = false;
+
 export const markAttendance = async (req, res) => {
   try {
-    const { studentId, subject, present } = req.body;
-
-    // Verify student belongs to teacher
-    const teacher = await Teacher.findById(req.user.id);
-    if (!teacher.students.includes(studentId)) {
+    if (isCapturing) {
       return res
-        .status(403)
-        .json({ message: "Unauthorized to mark attendance for this student" });
+        .status(400)
+        .json({ message: "Attendance capture already running" });
     }
 
-    // Add attendance record
-    await Student.findByIdAndUpdate(studentId, {
-      $push: {
-        attendance: {
-          date: new Date(),
-          subject,
-          present,
-        },
-      },
+    const teacher = await Teacher.findById(req.user.id);
+    const sub = teacher.subject;
+
+    isCapturing = true;
+    io.emit("capture-status", { capturing: true });
+
+    // Start process in background
+    runPythonScripts(sub).catch((error) => {
+      console.error("Error in Python process:", error);
+      isCapturing = false;
+      io.emit("error", error.message);
+      io.emit("capture-status", { capturing: false });
     });
 
-    res.json({ message: "Attendance marked successfully" });
+    res.json({ message: "Attendance capture started" });
   } catch (error) {
-    console.error("Error marking attendance:", error);
-    res.status(500).json({ message: "Failed to mark attendance" });
+    isCapturing = false;
+    res.status(500).json({ message: "Failed to start attendance capture" });
+  }
+};
+
+export const stopAttendance = async (req, res) => {
+  try {
+    if (!isCapturing) {
+      return res.status(400).json({ message: "No capture process running" });
+    }
+    const stopped = stopPythonScript();
+    isCapturing = false;
+    io.emit("capture-status", { capturing: false });
+    res.json({
+      message: stopped ? "Capture stopped successfully" : "No process to stop",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to stop capture" });
   }
 };
 

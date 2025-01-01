@@ -6,6 +6,7 @@ import {
   addStudent,
   markAttendance,
   downloadAttendanceReport,
+  stopAttendance,
 } from "../controllers/teacher.controller.js";
 import Teacher from "../models/Teacher.js";
 import { getStudentStatistics } from "../controllers/statisticsController.js";
@@ -14,12 +15,14 @@ import {
   updateStudent,
   deleteStudent,
 } from "../controllers/teacher.controller.js";
+import path from "path";
 
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname);
+    const customName = req.body.registerNo || "no-name";
+    const extension = path.extname(file.originalname);
+    cb(null, `${customName}${extension}`);
   },
 });
 
@@ -31,7 +34,7 @@ router.post("/login", login);
 router.post("/add-student", verifyToken, upload.single("photo"), addStudent);
 router.post("/mark-attendance", verifyToken, markAttendance);
 router.get("/attendance-report", verifyToken, downloadAttendanceReport);
-
+router.post("/stop-attendance", verifyToken, stopAttendance);
 // Add this new route to existing routes
 router.get("/students", verifyToken, async (req, res) => {
   try {
