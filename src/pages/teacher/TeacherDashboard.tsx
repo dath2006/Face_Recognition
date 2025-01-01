@@ -1,14 +1,17 @@
-import React from 'react';
-import { UserPlus, Camera, Download, MessageCircle, Users } from 'lucide-react';
-import DashboardLayout from '../../components/layouts/DashboardLayout';
-import { DashboardCard } from '../../components/dashboard';
-import { reportService } from '../../services/report/reportService';
-import { handleApiError } from '../../utils/errorHandling';
+import { useState } from "react";
+import { UserPlus, Camera, Download, MessageCircle, Users } from "lucide-react";
+import DashboardLayout from "../../components/layouts/DashboardLayout";
+import { DashboardCard } from "../../components/dashboard";
+import { reportService } from "../../services/report/reportService";
+import { handleApiError } from "../../utils/errorHandling";
+import DateRangeModal from "../../components/attendance/DateRangeModal";
 
 const TeacherDashboard = () => {
-  const handleDownloadReport = async () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDownloadReport = async (date: string) => {
     try {
-      await reportService.downloadAttendanceReport();
+      await reportService.downloadAttendanceReport(date);
     } catch (error) {
       handleApiError(error);
     }
@@ -44,7 +47,12 @@ const TeacherDashboard = () => {
             icon={Download}
             title="Download Report"
             description="Get attendance report"
-            onClick={handleDownloadReport}
+            onClick={() => setIsModalOpen(true)}
+          />
+          <DateRangeModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onDownload={handleDownloadReport}
           />
 
           <DashboardCard

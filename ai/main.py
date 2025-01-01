@@ -10,6 +10,7 @@ import cvzone
 import math
 import time
 import os
+import torch
 
 
 # Database connection
@@ -49,6 +50,7 @@ cam_width, cam_height = 625, 433  # Updated dimensions
 
 # Initialize YOLO model for anti-spoofing
 model = YOLO("ai/models/best.pt")
+results = model.predict(source=0, device='cuda:0', stream=True)
 classNames = {0: "Fake", 1: "Real"}
 
 

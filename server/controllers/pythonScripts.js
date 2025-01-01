@@ -4,6 +4,7 @@ import { io } from "../index.js";
 
 let pythonProcess = null;
 let count = 0;
+let present_students = [];
 
 async function executePythonScript(scriptPath, processOutput = false, sub) {
   count++;
@@ -17,10 +18,10 @@ async function executePythonScript(scriptPath, processOutput = false, sub) {
 
           const student = await Student.findOne({ registerNo });
           if (student) {
-            console.log("Student found:", student);
+            present_students.push(student._id.toString());
             io.emit(
               "attendance-update",
-              `Attendance marked for: ${student.name}`
+              `Attendance marked as Present for: ${student.name}`
             );
             const today = new Date();
             const formattedDate =
@@ -66,12 +67,48 @@ async function executePythonScript(scriptPath, processOutput = false, sub) {
   });
 }
 
-export const stopPythonScript = () => {
-  if (pythonProcess) {
+export const stopPythonScript = async (students, sub) => {
+  try {
+    if (!pythonProcess) {
+      return false;
+    }
+
+    // Process all absent students in parallel
+    await Promise.all(
+      students.map(async (id) => {
+        if (!present_students.includes(id.toString())) {
+          const student = await Student.findById(id.toString());
+          if (student) {
+            const today = new Date();
+            const formattedDate =
+              today.getFullYear() +
+              "-" +
+              String(today.getMonth() + 1).padStart(2, "0") +
+              "-" +
+              String(today.getDate()).padStart(2, "0");
+            student.attendance.push({
+              date: formattedDate,
+              subject: sub,
+              present: false,
+            });
+            await student.save();
+            io.emit(
+              "process-ended",
+              `Attendance marked as Absent for: ${student.name}`
+            );
+          }
+        }
+      })
+    );
+
     pythonProcess.kill();
+    present_students = []; // Reset the array
     return true;
+  } catch (error) {
+    console.error("Error in stopPythonScript:", error);
+    io.emit("error", "Error processing absent students");
+    throw error;
   }
-  return false;
 };
 
 export const runPythonScripts = async (sub) => {

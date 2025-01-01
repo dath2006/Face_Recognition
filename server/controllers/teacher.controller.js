@@ -165,7 +165,9 @@ export const stopAttendance = async (req, res) => {
     if (!isCapturing) {
       return res.status(400).json({ message: "No capture process running" });
     }
-    const stopped = stopPythonScript();
+    const teacher = await Teacher.findById(req.user.id);
+    const students = teacher.students;
+    const stopped = stopPythonScript(students, teacher.subject);
     isCapturing = false;
     io.emit("capture-status", { capturing: false });
     res.json({
@@ -180,7 +182,6 @@ export const downloadAttendanceReport = async (req, res) => {
   try {
     const teacherId = req.user.id;
     const { date } = req.query;
-
     // Get all students for this teacher
     const teacher = await Teacher.findById(teacherId).populate("students");
 
@@ -196,9 +197,7 @@ export const downloadAttendanceReport = async (req, res) => {
       },
       {
         $match: {
-          "attendance.date": {
-            $gte: new Date().toISOString().split("T")[0],
-          },
+          "attendance.date": date,
         },
       },
       {

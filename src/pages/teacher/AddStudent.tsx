@@ -12,6 +12,7 @@ import {
   Camera,
 } from "lucide-react";
 import api from "../../utils/api.ts";
+import { showNotification } from "../../utils/notification/notification.ts";
 
 interface Student {
   id: string;
@@ -69,7 +70,7 @@ const AddStudent = () => {
         setExistingStudent(response.data.student);
         setShowPopup(true);
       } else {
-        alert("Student added successfully!");
+        showNotification("Student added successfully", "success");
         navigate("/teacher/dashboard");
       }
     } catch (err) {
