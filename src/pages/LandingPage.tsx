@@ -26,7 +26,7 @@ const LandingPage = () => {
                 Student Portal
               </h2>
               <p className="text-gray-600 text-center">
-                Mark attendance and view your records
+                View your records and Chat with Teacher
               </p>
             </div>
           </Link>
