@@ -11,7 +11,7 @@ An AI-powered real-time face recognition-based attendance system that automates 
 - 🎥 **Live Camera Feed** – Monitor real-time attendance  
 - ⚡ **Real-time Updates** – Instant data synchronization  
 - 🔍 **Spoof Detection** – Prevents unauthorized access  
-- 📅 **Date-wise Reports** – Detailed history tracking  
+- 📅 **Date-wise Reports** – Detailed history tracking.
 
 ---
 
